@@ -20,8 +20,6 @@ df['amount'] = euro
 
 df = df.fillna('none')
 
-print list(df)
-print df.issuercountrycode.unique()
 issuercountrycode_category = pd.Categorical(df['issuercountrycode'])
 txvariantcode_category = pd.Categorical(df['txvariantcode'])
 currencycode_category = pd.Categorical(df['currencycode'])
@@ -66,37 +64,6 @@ print '\ndescribe (only for float data)'
 print df.describe()
 
 
+df.to_csv('clean.csv', index=False)
 
 
-d_view = [ (v,k) for k,v in txvariantcode_dict.iteritems() ]
-d_view.sort() # natively sort tuples by first element
-for v,k in d_view:
-    print "\"%s\"," % (k),
-
-#df.to_csv('clean.csv', index=False)
-
-
-#df1 = df_clean.ix[(df_clean['label_int']==1) | (df_clean['label_int']==0)]#237036 instances
-
-#print df1.head()
-#
-# df_input = (df1[['issuercountrycode', 'cardtype', 'issuer_id', 'currencycode', 'shoppercountrycode', 'shoppingtype', 'cvcsupply', 'cvcresponse_int', 'merchant_id', 'euro', 'label_int']])
-# df_input[['issuer_id','label_int']] = df_input[['issuer_id','label_int']].astype(int)
-# print df_input.dtypes
-# x = df_input[df_input.columns[0:-1]].as_matrix()
-# y = df_input[df_input.columns[-1]].as_matrix()
-#
-#
-# unique, counts = numpy.unique(y, return_counts=True)
-# print dict(zip(unique, counts))
-#
-# import matplotlib.pyplot as plt
-# plt.rc("font", size=14)
-# from sklearn.linear_model import LogisticRegression
-# from sklearn.cross_validation import train_test_split
-# import seaborn as sns
-# sns.set(style="white")
-# sns.set(style="whitegrid", color_codes=True)
-#
-# sns.heatmap(df_input.corr())
-# plt.show()
