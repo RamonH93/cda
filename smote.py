@@ -23,6 +23,9 @@ del df['bookingdate']
 del df['creationdate']
 del df['txid']
 
+
+print "classifier train features:", list(df)
+
 #splitting data in x and y
 y = df[['simple_journal']].copy()
 del df['simple_journal']
