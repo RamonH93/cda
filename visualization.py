@@ -35,15 +35,15 @@ df0 = df[df['simple_journal'] == 0]
 #
 # plt.show()
 
-#sns.boxplot(x="simple_journal", y="amount", data=df)
+# sns.boxplot(x="simple_journal", y="amount", data=df)
 # sns.FacetGrid(df, hue="simple_journal", size=6) \
 # .map(sns.kdeplot, "cardverificationcodesupplied") \
 #    .add_legend()
+# plt.show()
 
 # f, axes = plt.subplots(2, 2, figsize=(7, 7), sharex=True)
 # sns.distplot(df['currencycode'], kde=False, color="b", ax=axes[0, 0], norm_hist=True)
 
-#bins = np.linspace(0, 14, 15)
 
 text_values = ["cirrus", "electron", "mc", "mccredit", "mcdebit", "visa", "visabusiness", "visaclassic", "visacorporate", "visadebit", "visagold", "visaplatinum", "visapurchasing", "visasignature", "vpay"]
 x_values = np.arange(0, len(text_values) + 1, 1)

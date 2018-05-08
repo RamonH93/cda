@@ -52,6 +52,7 @@ df['accountcode'] = accountcode_category.codes
 df['mail_id'] = mail_id_category.codes
 df['ip_id'] = ip_id_category.codes
 df['card_id'] = card_id_category.codes
+df = df[df.simple_journal != 'Refused']
 journal = map(lambda x:1 if str(x) == 'Chargeback' else 0 if str(x) == 'Settled' else 0, df['simple_journal'])
 df['simple_journal'] = journal
 df['cvcresponsecode'] = map(lambda x:3 if x > 2 else x+0, df['cvcresponsecode']) #0 = Unknown, 1=Match, 2=No Match, 3=Not checked
@@ -62,7 +63,7 @@ print '\ntypes of index'
 print df.dtypes
 print '\ndescribe (only for float data)'
 print df.describe()
-
+print list(df)
 
 df.to_csv('clean.csv', index=False)
 
