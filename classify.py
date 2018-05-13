@@ -20,7 +20,7 @@ from sklearn.preprocessing import StandardScaler
 desired_width = 500
 pd.set_option('display.width', desired_width)
 
-df = pd.read_csv('clean1.csv')
+df = pd.read_csv('clean.csv')
 
 print "The number of fraudulent transaction very much smaller compared to the safe transactions:"
 print len(df[df["simple_journal"]==1]), "fraud cases and ", len(df[df["simple_journal"]==0]), "safe cases"
@@ -64,7 +64,6 @@ if __name__ == "__main__":
     fn = np.zeros(10)
     tp = np.zeros(10)
     i = 0
-    print df.head
     for train_index, test_index in skf.split(x,y):
 
         #print("TRAIN:", train_index, "TEST:", test_index)
@@ -72,7 +71,7 @@ if __name__ == "__main__":
         y_train, y_test = y[train_index], y[test_index]
 
         #applying SMOTE
-        oversampler = SMOTE(ratio=0.01, k_neighbors=3)#ratio=0.01, k_neighbors=3)#ratio='minority', random_state=None, k_neighbors=3, m=None, m_neighbors=50, out_step=0.2, kind='regular', svm_estimator=None, n_jobs=-1)
+        oversampler = SMOTE(ratio=0.01, k_neighbors=3)
         x_train, y_train = oversampler.fit_sample(x_train, y_train)
 
         #only normalizing for the MLPclassifier
@@ -84,7 +83,7 @@ if __name__ == "__main__":
         print ''
         print 'Preprocessing fold', i, 'done.'
 
-        # clf1 = DecisionTreeClassifier(min_samples_split=50)
+        # clf1 = DecisionTreeClassifier(min_samples_split=50) #WHITEBOXCLASSIFIER
         clf2 = RandomForestClassifier(n_estimators=600, n_jobs=-1)
         clf3 = MLPClassifier(solver='sgd', max_iter=300, alpha=1e-6, early_stopping=False)#alpha=0.0001, random_state=0, activation='tanh')#hidden_layer_sizes=(5, 2)
         #clf4 = LogisticRegression(penalty='l1', C=400.0)
@@ -102,7 +101,6 @@ if __name__ == "__main__":
         predictions = predictions.mean(0)
         predictions = adjusted_classes(predictions, 0.15)
 
-
         tn[i], fp[i], fn[i], tp[i] = metrics.confusion_matrix(y_test, predictions).ravel()
         accuracy = float(tp[i] + tn[i]) / (tp[i] + tn[i] + fn[i] + fp[i])
         recall = float(tp[i]) / (tp[i] + fn[i])
@@ -110,5 +108,34 @@ if __name__ == "__main__":
 
         print 'tn:', tn[i], ' fp:', fp[i], ' fn:', fn[i], ' tp:', tp[i], ' accuracy:', accuracy, ' recall:', recall, 'precision', precision
         i = i+1
+
+    print 'tn:', sum(tn), ' fp:', sum(fp), ' fn:', sum(fn), ' tp:', sum(tp)
+
+
+    #WHITEBOXCLASSIFIER:
+    print ''
+    print 'whiteboxclassifier:'
+    for train_index, test_index in skf.split(x, y):
+        # print("TRAIN:", train_index, "TEST:", test_index)
+        x_train, x_test = x[train_index], x[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+
+        # applying SMOTE
+        oversampler = SMOTE(ratio='minority', random_state=None, k_neighbors=3, m=None, m_neighbors=50, out_step=0.2, kind='regular', svm_estimator=None, n_jobs=-1)
+
+
+        clf1 = DecisionTreeClassifier(min_samples_split=50)
+        clf1.fit(x_train, y_train)
+        predictions = clf1.predict(x_test)
+        tn[i], fp[i], fn[i], tp[i] = metrics.confusion_matrix(y_test, predictions).ravel()
+
+        tn[i], fp[i], fn[i], tp[i] = metrics.confusion_matrix(y_test, predictions).ravel()
+        accuracy = float(tp[i] + tn[i]) / (tp[i] + tn[i] + fn[i] + fp[i])
+        recall = float(tp[i]) / (tp[i] + fn[i])
+        precision = float(tp[i]) / (tp[i] + fp[i])
+
+        print 'tn:', tn[i], ' fp:', fp[i], ' fn:', fn[i], ' tp:', tp[
+            i], ' accuracy:', accuracy, ' recall:', recall, 'precision', precision
+        i = i + 1
 
     print 'tn:', sum(tn), ' fp:', sum(fp), ' fn:', sum(fn), ' tp:', sum(tp)
