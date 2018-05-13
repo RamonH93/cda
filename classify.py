@@ -20,7 +20,7 @@ from sklearn.preprocessing import StandardScaler
 desired_width = 500
 pd.set_option('display.width', desired_width)
 
-df = pd.read_csv('clean2.csv')
+df = pd.read_csv('clean1.csv')
 
 print "The number of fraudulent transaction very much smaller compared to the safe transactions:"
 print len(df[df["simple_journal"]==1]), "fraud cases and ", len(df[df["simple_journal"]==0]), "safe cases"
