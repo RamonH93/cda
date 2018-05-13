@@ -5,18 +5,22 @@ from sklearn.linear_model import LogisticRegression
 from imblearn.over_sampling import SMOTE
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import StratifiedKFold
+from sklearn.svm import SVC
 from sklearn.neural_network import MLPClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, VotingClassifier
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.utils import shuffle
+from sklearn.naive_bayes import GaussianNB
 from sklearn.metrics import roc_curve, roc_auc_score
 import matplotlib.pyplot as plt
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.preprocessing import StandardScaler
 
 #set pandas output width, for printing dataframes and debugging purposes
-desired_width = 320
+desired_width = 500
 pd.set_option('display.width', desired_width)
 
-df = pd.read_csv('clean.csv')
+df = pd.read_csv('clean2.csv')
 
 print "The number of fraudulent transaction very much smaller compared to the safe transactions:"
 print len(df[df["simple_journal"]==1]), "fraud cases and ", len(df[df["simple_journal"]==0]), "safe cases"
@@ -24,19 +28,25 @@ print len(df[df["simple_journal"]==1]), "fraud cases and ", len(df[df["simple_jo
 #removing the dates, as SMOTE cannot handle those, also txid removed
 del df['bookingdate']
 del df['creationdate']
-del df['txid'] #otherwise 10% accuracy with tress/randomforest
-
+del df['txid'] #otherwise 100% accuracy with tress/randomforest
+del df['shoppercountrycode']
 del df['bin']
+del df['card_id']
 del df['accountcode']
 del df['mail_id']
 del df['ip_id']
-del df['card_id']
-
 del df['issuercountrycode']
-del df['shoppercountrycode']
+
+# del df['binnumberofcountries']
+# del df['bintotalamount']
+# del df['minuteamount']
 
 
-print "classifier train features:", list(df)
+# function that returns an array with binary data based on treshold t
+def adjusted_classes(y_scores, t):
+    return [1 if y >= t else 0 for y in y_scores]
+
+
 if __name__ == "__main__":
     #splitting data in x and y
     y = df[['simple_journal']].copy()
@@ -44,61 +54,61 @@ if __name__ == "__main__":
     y = y.simple_journal.values
     x =  df #df[['txvariantcode', 'cardverificationcodesupplied']]
     x = x.as_matrix()
-
-    from sklearn.utils import shuffle
     x, y = shuffle(x, y)
 
     #data splitting into a train set and a test set
     skf = StratifiedKFold(n_splits = 10) #stratifiedKfold desging choice!
-    skf.split(x, y)
 
+    tn = np.zeros(10)
+    fp = np.zeros(10)
+    fn = np.zeros(10)
+    tp = np.zeros(10)
+    i = 0
+    print df.head
     for train_index, test_index in skf.split(x,y):
+
         #print("TRAIN:", train_index, "TEST:", test_index)
         x_train, x_test = x[train_index], x[test_index]
         y_train, y_test = y[train_index], y[test_index]
-        oversampler = SMOTE(ratio='minority', random_state=None, k_neighbors=3, m=None, m_neighbors=50, out_step=0.2, kind='regular', svm_estimator=None, n_jobs=1)
+
+        #applying SMOTE
+        oversampler = SMOTE(ratio=0.01, k_neighbors=3)#ratio=0.01, k_neighbors=3)#ratio='minority', random_state=None, k_neighbors=3, m=None, m_neighbors=50, out_step=0.2, kind='regular', svm_estimator=None, n_jobs=-1)
         x_train, y_train = oversampler.fit_sample(x_train, y_train)
 
-
-        # clf1 = RandomForestClassifier(n_estimators=400, oob_score =False, n_jobs=-1).fit(x_train, y_train)
-        # prediction_probability1 = clf1.predict_proba(x_test)[:,1]
-        # # print 'clf1 ready'
-        # clf2 = LogisticRegression(penalty='l1', C=400.0, class_weight={0:9}).fit(x_train, y_train)#penalty='l2', dual=False, tol=0.0001, C=400.0, fit_intercept=True, intercept_scaling=1, class_weight={0:9}, random_state=None, solver='saga', max_iter=200, multi_class='ovr', verbose=0, warm_start=False, n_jobs=-1).fit(x_train, y_train)
-        # prediction_probability2 = clf2.predict_proba(x_test)[:,1]
-        # print 'clf2 ready'
-        # clf3 = KNeighborsClassifier(n_neighbors=2, leaf_size=200, p=2, weights='uniform', n_jobs=-1).fit(x_train, y_train)
-        # prediction_probability3 = clf3.predict_proba(x_test)[:,1]
-        # print 'clf3 ready'
-        # clf4 = MLPClassifier(solver='lbfgs', alpha=0.1, hidden_layer_sizes=(15,), random_state=0).fit(x_train, y_train)
-        # prediction_probability4 = clf4.predict_proba(x_test)[:,1]
-
-        # clf5 = AdaBoostClassifier(n_estimators=100, base_estimator=clf1).fit(x_train, y_train)
-        # prediction_probability5 = clf5.predict_proba(x_test)[:,1]
-
-
-
-        clf1 = DecisionTreeClassifier(min_samples_split=50)
-        clf2 = RandomForestClassifier()
-        clf3 = MLPClassifier(hidden_layer_sizes=(15,), alpha=0.01)
-        clf4 = LogisticRegression(penalty='l1', C=400.0, class_weight={0:9})
-        clf5 = KNeighborsClassifier(n_neighbors=2, leaf_size=200, p=2, weights='uniform', n_jobs=-1)
-
-        clfV = VotingClassifier(estimators=[('dt', clf1), ('rf', clf2), ('mlp', clf3), ('lr', clf4), ('kn', clf5)], n_jobs=-1)
-        clfV.fit(x_train, y_train)
-        prediction_probability = clfV.predict(x_test)
-
-
-
-        # predictions = np.vstack((prediction_probability1, prediction_probability2, prediction_probability3))
-        # predictions = predictions.mean(0)
-        # predictions = np.rint(np.array(predictions))
-
-        tn, fp, fn, tp = metrics.confusion_matrix(y_test, np.rint(np.array(prediction_probability))).ravel()
-        accuracy = float(tp + tn) / (tp + tn + fn + fp)
-        recall = float(tp) / (tp + fn)
-        precision = float(tp) / (tp + fp)
+        #only normalizing for the MLPclassifier
+        scaler = StandardScaler()
+        scaler.fit(x_train)
+        x_trainN = scaler.transform(x_train)
+        x_testN = scaler.transform(x_test)
 
         print ''
-        print 'tn:', tn, ' fp:', fp, ' fn:', fn, ' tp:', tp, ' accuracy:', accuracy, ' recall:', recall, 'precision', precision
+        print 'Preprocessing fold', i, 'done.'
+
+        # clf1 = DecisionTreeClassifier(min_samples_split=50)
+        clf2 = RandomForestClassifier(n_estimators=600, n_jobs=-1)
+        clf3 = MLPClassifier(solver='sgd', max_iter=300, alpha=1e-6, early_stopping=False)#alpha=0.0001, random_state=0, activation='tanh')#hidden_layer_sizes=(5, 2)
+        #clf4 = LogisticRegression(penalty='l1', C=400.0)
+        clf5 = KNeighborsClassifier(n_neighbors=3, leaf_size=200, p=2, weights='distance', n_jobs=-1)
+        #clf6 = GaussianNB()
+        clfV = VotingClassifier(estimators=[('rf', clf2), ('lr', clf3), ('kn', clf5)], n_jobs=-1, voting='soft')
+
+        clf2.fit(x_train, y_train)
+        clf3.fit(x_trainN, y_train)
+
+        predictions2 = clf2.predict_proba(x_test)[:,1]
+        predictions3 = clf3.predict_proba(x_testN)[:,1]
+
+        predictions = np.vstack((predictions2, predictions3))
+        predictions = predictions.mean(0)
+        predictions = adjusted_classes(predictions, 0.15)
 
 
+        tn[i], fp[i], fn[i], tp[i] = metrics.confusion_matrix(y_test, predictions).ravel()
+        accuracy = float(tp[i] + tn[i]) / (tp[i] + tn[i] + fn[i] + fp[i])
+        recall = float(tp[i]) / (tp[i] + fn[i])
+        precision = float(tp[i]) / (tp[i] + fp[i])
+
+        print 'tn:', tn[i], ' fp:', fp[i], ' fn:', fn[i], ' tp:', tp[i], ' accuracy:', accuracy, ' recall:', recall, 'precision', precision
+        i = i+1
+
+    print 'tn:', sum(tn), ' fp:', sum(fp), ' fn:', sum(fn), ' tp:', sum(tp)

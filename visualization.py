@@ -24,22 +24,25 @@ del df['ip_id']
 del df['txid']
 del df['mail_id']
 del df['bin']
+#del df['binnumberofcountries']
+#del df['bintotalamount']
+#del df['minuteamount']
 
 df1 = df[df['simple_journal'] == 1]
 df0 = df[df['simple_journal'] == 0]
 
-
+# print list(df)
 # columns = ['issuercountrycode', 'txvariantcode','cardverificationcodesupplied', 'currencycode', 'cvcresponsecode', 'shoppercountrycode', 'shopperinteraction']
 # df1.hist(density=True)
 # df0.hist(density=True)
 #
 # plt.show()
-
-# sns.boxplot(x="simple_journal", y="amount", data=df)
-# sns.FacetGrid(df, hue="simple_journal", size=6) \
-# .map(sns.kdeplot, "cardverificationcodesupplied") \
-#    .add_legend()
-# plt.show()
+#
+sns.boxplot(x="simple_journal", y="bintotalamount", data=df)
+sns.FacetGrid(df, hue="simple_journal", size=6) \
+.map(sns.kdeplot, "bintotalamount") \
+   .add_legend()
+plt.show()
 
 # f, axes = plt.subplots(2, 2, figsize=(7, 7), sharex=True)
 # sns.distplot(df['currencycode'], kde=False, color="b", ax=axes[0, 0], norm_hist=True)
@@ -73,7 +76,8 @@ plt.hist(df0['accountcode'], bins=x_values, alpha=0.8, density=True, color="oran
 plt.xticks(x_values+0.5, text_values, rotation=90)
 plt.xlabel("accountcode", fontsize=16)
 plt.ylabel("frequency", fontsize=16)
-plt.legend(loc='upper right')
+plt.legend(loc='upper left')
+plt.title('Accountcode frequencies')
 plt.show()
 
 
@@ -85,11 +89,12 @@ plt.xticks(x_values+0.5, text_values, rotation=90)
 plt.xlabel("cvcresponsecode", fontsize=16)
 plt.ylabel("frequency", fontsize=16)
 plt.legend(loc='upper right')
+plt.title('CVCresponsecode frequencies')
 plt.show()
 
 print list(df)
 
-names = ['issuercountrycode', 'txvariantcode', 'currencycode', 'shoppercountrycode', 'shopperinteraction', 'simple_journal', 'cardverificationcodesupplied', 'cvcresponsecode', 'accountcode']
+names = ['issuercountrycode', 'txvariantcode', 'currencycode', 'shoppercountrycode', 'shopperinteraction', 'simple_journal', 'cardverificationcodesupplied', 'cvcresponsecode', 'accountcode', 'bintotalamount', 'binnumberofcountries']
 data = df
 correlations = data.corr()
 # plot correlation matrix

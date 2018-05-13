@@ -36,7 +36,7 @@ x = df
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=0, stratify=y)
 
 #This is the oversampler
-oversampler = SMOTE(kind='regular')
+oversampler = SMOTE(ratio='minority')
 x_train_SMOTE,y_train_SMOTE=oversampler.fit_sample(x_train,y_train)
 
 def getClassifierScores(clf):
@@ -56,7 +56,7 @@ def plotROCcurves(fpr, tpr, fpr_SMOTE, tpr_SMOTE, auc, auc_SMOTE, title):
     plt.show()
 
 
-# #logistic classifiers  - good
+#logistic classifiers  - good
 clf_logistic_SMOTE=LogisticRegression().fit(x_train_SMOTE,y_train_SMOTE)
 clf_logistic=LogisticRegression().fit(x_train,y_train)
 
@@ -65,7 +65,7 @@ auc_SMOTE, fpr_SMOTE, tpr_SMOTE = getClassifierScores(clf_logistic_SMOTE)
 plotROCcurves(fpr, tpr, fpr_SMOTE, tpr_SMOTE, auc, auc_SMOTE, "ROC Logistic Regression")
 
 
-# #random forest classifiers - good
+#random forest classifiers - good
 clf_randomForest_SMOTE = RandomForestClassifier(n_estimators=50, criterion='gini')
 clf_randomForest_SMOTE.fit(x_train_SMOTE,y_train_SMOTE)
 clf_randomForest = RandomForestClassifier(n_estimators=50, criterion='gini')
@@ -83,7 +83,7 @@ clf_MLP.fit(x_train,y_train)
 
 auc, fpr, tpr = getClassifierScores(clf_MLP)
 auc_SMOTE, fpr_SMOTE, tpr_SMOTE = getClassifierScores(clf_MLP_SMOTE)
-plotROCcurves(fpr,tpr,fpr_SMOTE,tpr_SMOTE, auc, auc_SMOTE, "ROC Multilayer Perceptron")
+plotROCcurves(fpr,tpr,fpr_SMOTE,tpr_SMOTE, auc, auc_SMOTE, clf_MLP_SMOTE)
 
 
 #KneighborsClassifier classifiers
