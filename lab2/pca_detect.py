@@ -28,7 +28,7 @@ if __name__ == "__main__":
     df_test = scaler.fit_transform(df_test)
 
     ##################
-    pca = decomposition.PCA(n_components=43)#36 #new:43
+    pca = decomposition.PCA(n_components=36)#43
     pca.fit(df_trn1)
     pca_model = pca.transform(df_trn1)
 
@@ -37,16 +37,16 @@ if __name__ == "__main__":
     eigenvalues = pca.explained_variance_
 
     # Matrix P represents principal components corresponding to normal subspace
-    P = np.transpose(eigenvectors[:-28])#26
+    P = np.transpose(eigenvectors[:-25])#28/34
     P_T = np.transpose(P)
     C = np.dot(P, P_T) #linear operator
 
     # C_y = np.dot(df_trn1, C)
     # pca_residuals = np.square(df_trn1 - C_y).sum(axis=1) #squared prediction error
-    C2_y = np.dot(df_test, (np.identity(43)-C)) #(I-PP^T)*y
+    C2_y = np.dot(df_test, (C)) #(I-PP^T)*y
     SPE = np.square(df_test - C2_y).sum(axis=1)
 
-    threshold = 55
+    threshold = 8
 
     predictions = np.zeros((df_test.shape[0]))
     for i in range(len(predictions)):
