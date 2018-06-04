@@ -32,7 +32,7 @@ if __name__ == "__main__":
     df_test = scaler.fit_transform(df_test)
 
     ##################
-    pca = decomposition.PCA(n_components=36)#43
+    pca = decomposition.PCA(n_components=43)#43
     pca.fit(df_trn1)
     pca_model = pca.transform(df_trn1)
 
@@ -41,12 +41,10 @@ if __name__ == "__main__":
     eigenvalues = pca.explained_variance_
 
     # Matrix P represents principal components corresponding to normal subspace
-    P = np.transpose(eigenvectors[:-25])#28/34
+    P = np.transpose(eigenvectors[:-32])
     P_T = np.transpose(P)
     C = np.dot(P, P_T) #linear operator
 
-    # C_y = np.dot(df_trn1, C)
-    # pca_residuals = np.square(df_trn1 - C_y).sum(axis=1) #squared prediction error
     C2_y = np.dot(df_test, (C)) #(I-PP^T)*y
     SPE = np.square(df_test - C2_y).sum(axis=1)
 
@@ -97,8 +95,8 @@ if __name__ == "__main__":
     ####################
     columns = ['L_T1', 'L_T2', 'L_T3', 'L_T4', 'L_T5', 'L_T6', 'L_T7', 'F_PU1', 'F_PU2', 'F_PU3', 'F_PU4', 'F_PU5', 'F_PU6','F_PU7','F_PU8', 'F_PU9','F_PU10', 'F_PU11', 'F_V2', 'S_V2', 'P_J280', 'P_J269', 'P_J300', 'P_J256', 'P_J289', 'P_J415', 'P_J302', 'P_J306', 'P_J307', 'P_J317', 'P_J14', 'P_J422']
     #predictions = np.zeros((df_test.shape[0]))
-    n = 10 #max n for ngram
-    s = 2 #number of letters
+    n = 8 #max n for ngram
+    s = 3 #number of letters
     df_trn1, df_trn2, df_test = utils.import_datasets()
     for col in columns:
         df_trn1[col] = list(ts_to_string(df_trn1[col], cuts_for_asize(s)))
@@ -131,6 +129,9 @@ if __name__ == "__main__":
             tn = tn + 1
         if (labels[i] == 1 and predictions[i] == 0):
             fn = fn + 1
+
+    print ''
+    print ''
     print "PCA with NGRAMS combined:"
     print 'tp: ', tp
     print 'fp: ', fp
