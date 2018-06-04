@@ -1,5 +1,5 @@
 import pandas as pd
-
+import argparse
 def import_datasets():
     # set pandas output width
     desired_width = 320
@@ -7,8 +7,10 @@ def import_datasets():
 
     # read datasets
     df_trn1 = pd.read_csv('BATADAL_dataset03.csv', nrows=8762)
-    df_trn2 = pd.read_csv('BATADAL_dataset04.csv', nrows=100)
-    df_test = pd.read_csv('BATADAL_test_dataset.csv', nrows=100)
+    df_trn2 = pd.read_csv('BATADAL_dataset04.csv')
+    #df_test = pd.read_csv('BATADAL_test_dataset.csv')
+
+    df_test = pd.read_csv('Batadal_labeled_test.csv', delimiter=";")
 
     # clean datasets
     df_trn1['DATETIME'] = pd.to_datetime(df_trn1['DATETIME'], dayfirst=True)  # convert timestamps

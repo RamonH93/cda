@@ -89,7 +89,7 @@ if __name__ == "__main__":
     ######################
 
 
-    #COMBINING PCA with NGRAMS:
+    #COMBINING PCA with NGRAMS for potential bonus
 
 
     ####################
