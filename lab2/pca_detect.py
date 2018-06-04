@@ -4,6 +4,11 @@ from sklearn import decomposition
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import discrete
+
+from saxpy.alphabet import cuts_for_asize
+from saxpy.znorm import znorm
+from saxpy.sax import ts_to_string
 
 if __name__ == "__main__":
     df_trn1, df_trn2, df_test = utils.import_datasets()
@@ -81,3 +86,55 @@ if __name__ == "__main__":
     ax.hlines(y=threshold, xmin=df_time2[0], xmax=df_time2.iloc[-1], linewidth=2, color='r')
     ax.plot(x, y)
     plt.show()
+
+
+    ######################
+
+
+    #COMBINING PCA with NGRAMS:
+
+
+    ####################
+    columns = ['L_T1', 'L_T2', 'L_T3', 'L_T4', 'L_T5', 'L_T6', 'L_T7', 'F_PU1', 'F_PU2', 'F_PU3', 'F_PU4', 'F_PU5', 'F_PU6','F_PU7','F_PU8', 'F_PU9','F_PU10', 'F_PU11', 'F_V2', 'S_V2', 'P_J280', 'P_J269', 'P_J300', 'P_J256', 'P_J289', 'P_J415', 'P_J302', 'P_J306', 'P_J307', 'P_J317', 'P_J14', 'P_J422']
+    #predictions = np.zeros((df_test.shape[0]))
+    n = 10 #max n for ngram
+    s = 2 #number of letters
+    df_trn1, df_trn2, df_test = utils.import_datasets()
+    for col in columns:
+        df_trn1[col] = list(ts_to_string(df_trn1[col], cuts_for_asize(s)))
+        df_test[col] = list(ts_to_string(df_test[col], cuts_for_asize(s)))
+
+        ngrams = discrete.find_ngrams(df_trn1[col] , n)
+
+        occurances =  discrete.find_occurances(ngrams)
+        probas = discrete.find_probabilities(occurances)
+
+        ngramsTest = discrete.find_ngrams(df_test[col], n)
+
+
+        counter = n-1
+        for r in ngramsTest[n-2]:
+            if probas[n-2].get(r) < 0.000000001:
+                predictions[counter] = 1
+            counter += 1
+
+    tp = 0
+    fp = 0
+    tn = 0
+    fn = 0
+    for i in range(df_test.shape[0]):
+        if (labels[i] == 1 and predictions[i] == 1):
+            tp = tp + 1
+        if (labels[i] == 0 and predictions[i] == 1):
+            fp = fp + 1
+        if (labels[i] == 0 and predictions[i] == 0):
+            tn = tn + 1
+        if (labels[i] == 1 and predictions[i] == 0):
+            fn = fn + 1
+    print "PCA with NGRAMS combined:"
+    print 'tp: ', tp
+    print 'fp: ', fp
+    print 'fn: ', fn
+    print 'tn: ', tn
+    print 'precision:', 1.0 * tp / (tp + fp)
+    print 'recall:', 1.0 * tp / (tp + fn)

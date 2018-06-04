@@ -72,8 +72,7 @@ if __name__ == "__main__":
     # printing the rows that contain an abnormality
     for i in range(len(df_trn1)):
         if (pca_residuals[i] > threshold):
-            print i
-            #print 'Row ', i, 'contains an abnormality and should be removed'
+            print 'Row ', i, 'contains an abnormality and should be removed'
 
     ################33
     # plotting the
