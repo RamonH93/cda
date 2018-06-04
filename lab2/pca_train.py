@@ -64,10 +64,9 @@ if __name__ == "__main__":
     phi2 = sum(lambda2[15:])
     phi3 = sum(lambda3[15:])
     h_0 = 1 - ((2.0 * phi1 * phi3) / (3 * (phi2 ** 2)))
-    Ca = 2.5 #choosing a false alarm rate of 3%
+    Ca = 3 #choosing a false alarm rate of 3%
     threshold = phi1 * np.power(1.0 * (Ca * np.sqrt(2 * phi2 * (h_0 ** 2)) / phi1) + 1 + (1.0 * (phi2 * h_0 * (h_0 - 1)) / (phi1 ** 2)), (1.0 / h_0))
     print phi1, phi2, phi3, h_0, threshold
-
 
     ##############
     # printing the rows that contain an abnormality
