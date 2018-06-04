@@ -11,20 +11,31 @@ from collections import Counter
 
 if __name__ == "__main__":
     df_trn1, df_trn2, df_test = utils.import_datasets()
-
-    # to plot the data:
-    # x = df_trn2['DATETIME']
-    # y = df_trn2['L_T7']
-    # plt.plot(x, y)
-    # plt.show()
-    # y = list(ts_to_string(df_trn2['L_T7'], cuts_for_asize(5)))
-    # x = df_trn2['DATETIME']
-    # plt.step(x, y)
-    # plt.show()
+    df_trn2 = df_trn2[df_trn2['ATT_FLAG'] != 0]
+    #col = 'F_PU5'
+    #col = 'L_T2'
+    col = 'P_J422'
+    n = 5 #max n for ngram
+    s = 5 #number of letters
 
     #normalize the data
-    df_trn1['L_T7'] = znorm(df_trn1['L_T7'])
-    df_trn2['L_T7'] = znorm(df_trn2['L_T7'])
+    df_trn1[col] = znorm(df_trn1[col])
+    df_trn2[col] = znorm(df_trn2[col])
+    df_test[col] = znorm(df_test[col])
+
+
+    #to plot the data:
+    x = df_test['DATETIME']
+    y = df_test[col]
+    plt.plot(x, y)
+    plt.show()
+    #y = list(ts_to_string(df_trn2[col], cuts_for_asize(5)))
+    df_test[col] = list(ts_to_string(df_test[col], cuts_for_asize(s)))
+    y = [ord(x) for x in df_test[col]]
+    x = df_test['DATETIME']
+    plt.step(x, y)
+    plt.show()
+
 
     def find_ngrams(input_list, n):
         grams = []
@@ -49,21 +60,23 @@ if __name__ == "__main__":
             probabilities.append(dict)
         return probabilities
 
+    df_trn1[col] = list(ts_to_string(df_trn1[col], cuts_for_asize(s)))
+    df_trn2[col] = list(ts_to_string(df_trn2[col], cuts_for_asize(s)))
+    df_test[col] = list(ts_to_string(df_test[col], cuts_for_asize(s)))
 
-    n = 5 #max n for ngram
-    s = 4 #number of letters
+    ngrams = find_ngrams(df_trn1[col] , n)
+    ngrams2 = find_ngrams(df_trn2[col], n)
+    ngrams3 = find_ngrams(df_trn2[col], n)
+    combinedngrams = ngrams + ngrams2
 
-    df_trn1['L_T7'] = list(ts_to_string(df_trn1['L_T7'], cuts_for_asize(s)))
-    df_trn2['L_T7'] = list(ts_to_string(df_trn2['L_T7'], cuts_for_asize(s)))
 
-    ngrams = find_ngrams(df_trn1['L_T7'] , n)
-    ngrams2 = find_ngrams(df_trn2['L_T7'], n)
-    occurances =  find_occurances(ngrams)
+    occurances =  find_occurances(combinedngrams)
     probas = find_probabilities(occurances)
 
     counter = n-1
-    for r in ngrams2[3]:
-        if probas[3].get(r) < 0.0001:
-            print df_trn2['DATETIME'][counter] #print datatime if below treshold
+    for r in ngrams3[3]:
+        #if probas[3].get(r) < 0.0001:
+        if probas[3].get(r) < 0.0000000001:
+            print df_test['DATETIME'][counter] #print datatime if below treshold
         counter += 1
 

@@ -9,17 +9,17 @@ if __name__ == "__main__":
     df_trn1, df_trn2, df_test = utils.import_datasets()
     #df_trn1 = df_trn1.drop(df_trn1.index[[2348, 2349, 2350, 2854, 2855, 3000, 3001, 3023, 3024, 3336, 3337, 3356, 3357, 3358, 3861, 3862, 4365, 4366, 7222, 7223]])
     #df_trn1 = df_trn1.drop(df_trn1.index[[1764,2461,3000,3001,3336,3337,5572,6084,7573,8646]])
+    df_trn1 = df_trn1.drop(df_trn1.index[[205,581,582,697,1052,1058,1185,1284,1565,1592,1744,1764,1891,2430,2461,2871,3000,3001,3200, 3301,3336,3337,3614,3628,3857,3880,3974,3988,4251,4623,5049,5149,5186,5271,5571,5572,5573,5724,6084,6614,6663,6765,6941,7573,8238,8295,8646]])
     df_time1 = df_trn1['DATETIME']
-    df_time2 = df_trn2['DATETIME']
+    df_time2 = df_test['DATETIME']
     df_time_test = df_trn2['DATETIME']
     df_trn2 = df_trn2.replace(-999, 0)
-    labels = df_trn2['ATT_FLAG']
-
+    labels = df_test['ATT_FLAG']
     del df_trn1['DATETIME']
     del df_trn2['DATETIME']
     del df_test['DATETIME']
     del df_trn1['ATT_FLAG']
-    del df_trn2['ATT_FLAG']
+    del df_test['ATT_FLAG']
 
     #normalising
     scaler = StandardScaler()
@@ -41,14 +41,14 @@ if __name__ == "__main__":
     P_T = np.transpose(P)
     C = np.dot(P, P_T) #linear operator
 
-    C_y = np.dot(df_trn1, C)
-    pca_residuals = np.square(df_trn1 - C_y).sum(axis=1) #squared prediction error
-    C2_y = np.dot(df_trn2, (np.identity(43)-C)) #(I-PP^T)*y
-    SPE = np.square(df_trn2 - C2_y).sum(axis=1)
+    # C_y = np.dot(df_trn1, C)
+    # pca_residuals = np.square(df_trn1 - C_y).sum(axis=1) #squared prediction error
+    C2_y = np.dot(df_test, (np.identity(43)-C)) #(I-PP^T)*y
+    SPE = np.square(df_test - C2_y).sum(axis=1)
 
-    threshold = 75
+    threshold = 55
 
-    predictions = np.zeros((df_trn2.shape[0]))
+    predictions = np.zeros((df_test.shape[0]))
     for i in range(len(predictions)):
         if (SPE[i] > threshold):
             predictions[i] = 1
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     fp = 0
     tn = 0
     fn = 0
-    for i in range(df_trn2.shape[0]):
+    for i in range(df_test.shape[0]):
         if (labels[i] == 1 and predictions[i] == 1):
             tp = tp + 1
         if (labels[i] == 0 and predictions[i] == 1):
